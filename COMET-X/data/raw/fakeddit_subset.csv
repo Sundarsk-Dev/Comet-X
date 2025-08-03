@@ -1,0 +1,4 @@
+id,title,image_url,label,created_utc
+post_1,Breaking News: Sun is now square!,https://via.placeholder.com/150/FF0000/FFFFFF?text=Fake_News_Img,fake,1678886400
+post_2,Cat enjoys a nap in a box.,https://via.placeholder.com/150/00FF00/FFFFFF?text=Real_News_Img,real,1678886500
+post_3,Aliens landed in my backyard yesterday!,https://via.placeholder.com/150/0000FF/FFFFFF?text=Alien_Img,fake,1678886600
