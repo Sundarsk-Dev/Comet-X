@@ -1,4 +1,3 @@
-# FILE: src/encoders.py
 import torch
 from transformers import AutoTokenizer, AutoModel, ViTFeatureExtractor, ViTModel
 from PIL import Image
@@ -73,4 +72,5 @@ def get_image_embedding(image_url):
 
     except Exception as e:
         print(f"An error occurred during image embedding generation: {e}")
+
         return None
