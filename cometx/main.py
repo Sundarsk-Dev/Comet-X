@@ -1,5 +1,3 @@
-
-# FILE: main.py
 import torch
 import numpy as np
 from src.encoders import get_text_embedding, get_image_embedding
@@ -87,3 +85,4 @@ if __name__ == "__main__":
     # In VS Code, you'd use 'pip install -r requirements.txt' from your terminal.
     # !pip install transformers torch numpy torchvision Pillow torch_geometric
     main()
+
