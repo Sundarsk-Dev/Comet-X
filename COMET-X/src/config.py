@@ -1,7 +1,5 @@
-# src/config.py
 import os
 
-# Root directory of the project (assuming this file is in src/)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Define main directories
@@ -65,4 +63,5 @@ AI_DETECTOR_BATCH_SIZE = 32
 # TEXT_EMBEDDING_DIM (768) + IMAGE_EMBEDDING_DIM (512) + AI_IMAGE_SCORE (1)
 GNN_INPUT_DIM_CONTENT = TEXT_EMBEDDING_DIM + IMAGE_EMBEDDING_DIM + 1
 # User node feature dimension (from your dummy data)
+
 GNN_INPUT_DIM_USER = 1
