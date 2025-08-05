@@ -1,0 +1,10 @@
+transformers
+torch
+torchvision
+torch-geometric
+numpy
+scipy
+pandas
+scikit-learn
+Pillow
+requests
