@@ -8,8 +8,6 @@ from src.hemmr import explain_prediction
 from src.fact_checker import check_facts
 from torch_geometric.nn import to_hetero
 
-# You can add this line at the top to disable the Hugging Face symlink warning
-# This is optional but can make the output cleaner
 warnings.filterwarnings("ignore", category=UserWarning, module="huggingface_hub.file_download")
 
 def main():
@@ -92,3 +90,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
