@@ -30,7 +30,6 @@ def main():
     }
 
     # --- 2. Feature Extraction ---
-    # Extracts numerical representations (embeddings) from text and image content.
     print("\n[STEP 1/7] Extracting features from text and image...")
     text_vec = get_text_embedding(sample_post['text_content'])
     image_vec = get_image_embedding(sample_post['image_url'])
@@ -127,4 +126,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
