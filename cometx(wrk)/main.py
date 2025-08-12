@@ -12,6 +12,9 @@ from transformers import ViTFeatureExtractor, ViTModel, RobertaTokenizer, Robert
 from torch_geometric.data import HeteroData
 from torch_geometric.nn import to_hetero
 
+# CORRECTED: The import path now points to the file inside the 'src' directory
+from src.fact_checker import search_fact_checks
+
 # You can add this line at the top to disable the Hugging Face symlink warning
 # This is optional but can make the output cleaner
 warnings.filterwarnings("ignore", category=UserWarning, module="huggingface_hub.file_download")
@@ -40,22 +43,25 @@ def get_image_embedding(image_source):
     try:
         image = None
         # Check if the source is a base64 string
-        if image_source.startswith("data:image"):
+        if isinstance(image_source, str) and image_source.startswith("data:image"):
             header, encoded_data = image_source.split(',', 1)
             image_data = base64.b64decode(encoded_data)
             image = Image.open(BytesIO(image_data)).convert("RGB")
             print("Loading image from base64 string.")
         # Check if the source is a local file path
-        elif os.path.exists(image_source):
+        elif isinstance(image_source, str) and os.path.exists(image_source):
             image = Image.open(image_source).convert("RGB")
             print(f"Loading image from local file: {image_source}")
         # Check if the source is a URL
-        elif image_source.startswith(('http://', 'https://')):
+        elif isinstance(image_source, str) and image_source.startswith(('http://', 'https://')):
             response = requests.get(image_source)
             image = Image.open(BytesIO(response.content)).convert("RGB")
             print(f"Loading image from URL: {image_source}")
+        elif isinstance(image_source, BytesIO):
+            image = Image.open(image_source).convert("RGB")
+            print("Loading image from in-memory bytes.")
         else:
-            raise ValueError(f"Invalid image source: {image_source}")
+            raise ValueError(f"Invalid image source type or path: {image_source}")
 
         # Use a pre-trained ViT model for embedding
         feature_extractor = ViTFeatureExtractor.from_pretrained('google/vit-base-patch16-224')
@@ -67,6 +73,7 @@ def get_image_embedding(image_source):
     except Exception as e:
         print(f"An error occurred during image embedding generation: {e}")
         return None
+
 
 def fuse_embeddings(text_vec, image_vec):
     """Combines text and image embeddings by concatenation."""
@@ -124,14 +131,10 @@ def detect_ai_generated_image(image_url):
         'confidence': 95.0
     }
 
-def check_facts(text_content):
-    """Mock function for external fact-checking."""
-    # This is a dummy response
-    return None
-
 def perform_context_analysis(text_content):
     """
     Mock function to simulate context analysis based on the text claim.
+    This version includes more keywords to better detect financial scams.
     """
     if not text_content:
         return "No text content was provided for analysis."
@@ -139,16 +142,16 @@ def perform_context_analysis(text_content):
     text_content_lower = text_content.lower()
     if "world war" in text_content_lower or "declared" in text_content_lower:
         return "The claim of a new world war being declared is a very serious and public event that would be widely reported by all major news outlets. The lack of such reports is a strong indicator of misinformation."
-    elif "free money" in text_content_lower or "free gift card" in text_content_lower:
-        return "The claim of receiving free money or gift cards from a financial institution is a classic phishing and scam tactic. Legitimate banks do not operate this way."
+    elif "free money" in text_content_lower or "free gift card" in text_content_lower or "stealing" in text_content_lower or "fraud" in text_content_lower or "scam" in text_content_lower:
+        return "The claim of receiving free money, gift cards, or a financial institution stealing money is a classic phishing and scam tactic. Legitimate banks do not operate this way, and such claims should be viewed with extreme skepticism."
     else:
         return "The provided text claim is a general statement that could be true or false. More specific context is needed for a detailed analysis."
 
 def explain_prediction(post_prediction, attention_weights, context_analysis_result):
     """Generates a human-readable explanation based on provided weights and context."""
-    confidence = post_prediction[0].item() if post_prediction[1].item() > post_prediction[0].item() else post_prediction[1].item()
-    confidence_score = 1 - confidence
-    claim_status = "credible" if confidence_score > 0.5 else "fake"
+    # This logic has been reversed to correctly report confidence for "fake" posts
+    confidence_score = post_prediction[0].item()
+    claim_status = "fake" if confidence_score > 0.5 else "credible"
     
     explanation_parts = []
     
@@ -271,7 +274,8 @@ def main():
     # We will now create a more definitive mock prediction.
     mock_prediction = None
     text_content_lower = sample_post.get('text_content', '').lower()
-    if 'world war' in text_content_lower or 'free money' in text_content_lower:
+    if ('world war' in text_content_lower or 'free money' in text_content_lower or
+        'stealing' in text_content_lower or 'scam' in text_content_lower or 'fraud' in text_content_lower):
         # A strong fake prediction
         mock_prediction = torch.tensor([[0.95, 0.05]])
     else:
@@ -289,11 +293,12 @@ def main():
         print("\n[STEP 5/7] Detecting AI-generated image content...")
         print("No image content provided. Skipping AI image detection.")
     
-    # --- 7. Fact-Checking API Call ---
+    # --- 7. Fact-Checking API Call (NOW LIVE) ---
     fact_check_result = None
     if sample_post.get('text_content'):
         print("\n[STEP 6/7] Cross-referencing with fact-checking services...")
-        fact_check_result = check_facts(sample_post['text_content'])
+        # CALL THE REAL API HERE
+        fact_check_result = search_fact_checks(sample_post['text_content'])
     else:
         print("\n[STEP 6/7] Cross-referencing with fact-checking services...")
         print("No text content provided. Skipping external fact-check.")
@@ -347,3 +352,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
