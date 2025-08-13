@@ -140,6 +140,25 @@ def perform_context_analysis(text_content):
         return "No text content was provided for analysis."
         
     text_content_lower = text_content.lower()
+    
+    # Check for keywords related to conspiracy theories
+    conspiracy_keywords = ['deep state', 'new world order', 'illuminati', 'qanon', 'chemtrails']
+    if any(kw in text_content_lower for kw in conspiracy_keywords):
+        return ("The claim contains keywords often associated with conspiracy theories. "
+                "These types of claims typically lack credible, verifiable evidence and should be treated with extreme skepticism.")
+                
+    # Check for keywords related to medical/health hoaxes
+    health_hoax_keywords = ['miracle cure', 'vaccine microchip', 'natural detox', 'cure-all']
+    if any(kw in text_content_lower for kw in health_hoax_keywords):
+        return ("The claim suggests a 'miracle cure' or a similar unproven medical solution. "
+                "Such claims are often false and can be dangerous, as they are not supported by scientific consensus or medical professionals.")
+
+    # Check for keywords related to unsupported scientific claims
+    unsupported_science_keywords = ['free energy', 'perpetual motion', 'flat earth']
+    if any(kw in text_content_lower for kw in unsupported_science_keywords):
+        return ("The claim is based on a concept that has been widely debunked by the scientific community. "
+                "It contradicts fundamental principles of physics and established scientific knowledge.")
+    
     if "world war" in text_content_lower or "declared" in text_content_lower:
         return "The claim of a new world war being declared is a very serious and public event that would be widely reported by all major news outlets. The lack of such reports is a strong indicator of misinformation."
     elif "free money" in text_content_lower or "free gift card" in text_content_lower or "stealing" in text_content_lower or "fraud" in text_content_lower or "scam" in text_content_lower:
@@ -385,4 +404,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
