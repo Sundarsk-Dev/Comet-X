@@ -313,9 +313,44 @@ def main():
         attention_weights['image_focus'] = f"the AI image detection result which classified the image as '{ai_image_detection_result['predicted_label']}'"
 
     context_analysis_result = perform_context_analysis(sample_post['text_content'])
-
-    explanation = explain_prediction(post_prediction, attention_weights, context_analysis_result)
     
+    # --- FINAL VERDICT LOGIC (NEW) ---
+    final_claim_status = "credible"
+    final_confidence = 0.0
+    
+    # Check for a definitive fact-check verdict
+    has_definitive_fact_check = False
+    if fact_check_result:
+        for result in fact_check_result:
+            rating = result.get('rating', '').lower()
+            # Define keywords for a "fake" verdict
+            fake_keywords = ['false', 'misleading', 'hoax', 'inaccurate']
+            if any(kw in rating for kw in fake_keywords):
+                final_claim_status = "fake"
+                final_confidence = 0.99  # High confidence based on external source
+                has_definitive_fact_check = True
+                break  # Stop checking if a fake verdict is found
+    
+    # If no definitive fact-check was found, use the GNN's prediction
+    if not has_definitive_fact_check:
+        confidence_score = post_prediction[0].item() if post_prediction[0].item() > post_prediction[1].item() else post_prediction[1].item()
+        claim_status_label = "fake" if mock_prediction[0][0] > mock_prediction[0][1] else "credible"
+        final_claim_status = claim_status_label
+        final_confidence = confidence_score
+
+    # --- Generate the final explanation based on the chosen verdict ---
+    explanation_parts = []
+    
+    if has_definitive_fact_check:
+        # A more direct explanation when a fact-check is found
+        explanation = (
+            f"Based on a conclusive finding from an external fact-checking service, "
+            f"this claim is definitively **{final_claim_status}**."
+        )
+    else:
+        # Fall back to the original HEMMR explanation
+        explanation = explain_prediction(post_prediction, attention_weights, context_analysis_result)
+
     print("\n--- COMPILED ANALYSIS ---")
     
     # Output the AI Image Detection Result
@@ -340,15 +375,13 @@ def main():
         print("External Fact-Check: Not performed (no text provided).")
         
     # Output the HEMMR explanation
-    print("\nExplanation (HEMMR):")
+    print("\nExplanation:")
     print(explanation)
     
     print("-" * 25) # Separator to highlight the final status
     
     # Output the GNN Prediction as the final result
-    confidence_score = post_prediction[0].item() if post_prediction[0].item() > post_prediction[1].item() else post_prediction[1].item()
-    claim_status_label = "fake" if mock_prediction[0][0] > mock_prediction[0][1] else "credible"
-    print(f"Final Claim Status: The post is likely **{claim_status_label}** with a confidence of {confidence_score:.2f}.")
+    print(f"Final Claim Status: The post is likely **{final_claim_status}** with a confidence of {final_confidence:.2f}.")
 
 if __name__ == "__main__":
     main()
