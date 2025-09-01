@@ -1,4 +1,3 @@
-# FILE: main.py
 import torch
 import numpy as np
 import warnings
@@ -404,3 +403,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
