@@ -1,4 +1,3 @@
-# FILE: app.py
 import streamlit as st
 from PIL import Image
 import io
@@ -6,7 +5,6 @@ import torch
 import numpy as np
 import warnings
 
-# Temporarily ignore the deprecation warning for now
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Import the core functions from the original main.py file
@@ -227,3 +225,4 @@ with main_container:
 
             except Exception as e:
                 st.error(f"❌ An error occurred during analysis: {e}")
+
